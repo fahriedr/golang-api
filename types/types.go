@@ -13,6 +13,7 @@ type ProductStore interface {
 	CreateProduct(Product) error
 	GetProductsByIDs(ps []int) ([]Product, error)
 	UpdateProduct(Product) error
+	GetDetailProduct(ps int) (*Product, error)
 }
 
 type OrderStore interface {
@@ -84,4 +85,8 @@ type ProductPayload struct {
 
 type CartCheckoutPayload struct {
 	Items []CartItem `json:"items" validate:"required"`
+}
+
+type ProductDetailPayload struct {
+	ID int `json:"id" validate:"required"`
 }

@@ -1,11 +1,11 @@
 build:
-	@go build -o bin/golang-api cmd/main.go
+	@go build -o ./tmp/main ./cmd/main.go
 
 test:
 	@go test -v ./...
 
 run: build
-	@./bin/golang-api
+	@./tmp/main
 
 migration:
 	@migrate create -ext sql -dir cmd/migrate/migrations $(filter-out $@,$(MAKECMDGOALS))

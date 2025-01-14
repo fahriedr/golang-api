@@ -103,3 +103,17 @@ func (s *Store) UpdateProduct(product types.Product) error {
 
 	return nil
 }
+
+func (s *Store) GetDetailProduct(id int) (*types.Product, error) {
+
+	p, err := s.db.Exec("SELECT * FROM products where id=?", id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println(p)
+
+	return nil, nil
+
+}

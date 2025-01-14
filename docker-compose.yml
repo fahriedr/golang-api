@@ -9,6 +9,10 @@ services:
       - "8083:8083"
     environment:
       - PORT=8083
+      - GIN_MODE=release
+      - AIR_TMP_DIR=/app/tmp
     volumes:
-      - .:/app
+      - /app/tmp
+      - ./:/app
     restart: unless-stopped
+    command: ["air", "-c", ".air.toml"]
