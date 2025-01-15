@@ -6,6 +6,7 @@ import (
 	"golang-api/types"
 	"golang-api/utils"
 	"net/http"
+	"strconv"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
@@ -59,24 +60,15 @@ func (h *Handler) handleCreateProduct(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) handleGetProduct(w http.ResponseWriter, r *http.Request) {
 
-	// q := mux.Vars(r)
-	fmt.Println("yihaa")
+	q := mux.Vars(r)
+	id, err := strconv.Atoi(q["id"])
 
-	utils.WriteJSON(w, http.StatusOK, "abang tukang siomay")
-
-	var payload types.ProductDetailPayload
-	if err := utils.ParseJSON(r, &payload); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	if err := utils.Validate.Struct(payload); err != nil {
-		errors := err.(validator.ValidationErrors)
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid payload %v", errors))
-		return
-	}
-
-	p, err := h.store.GetDetailProduct(payload.ID)
+	p, err := h.store.GetDetailProduct(id)
 
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)

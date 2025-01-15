@@ -106,14 +106,25 @@ func (s *Store) UpdateProduct(product types.Product) error {
 
 func (s *Store) GetDetailProduct(id int) (*types.Product, error) {
 
-	p, err := s.db.Exec("SELECT * FROM products where id=?", id)
+	rows, err := s.db.Query("SELECT * FROM products WHERE id=?", id)
 
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Println(p)
+	p := new(types.Product)
 
-	return nil, nil
+	for rows.Next() {
+		p, err = scanRowsIntoProduct(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if p.ID == 0 {
+		return nil, fmt.Errorf("product not found")
+	}
+
+	return p, nil
 
 }
