@@ -22,9 +22,10 @@ func NewHandler(store types.ProductStore) *Handler {
 }
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
-	router.HandleFunc("/products", auth.WithJWTAuth(h.handleGetProducts, h.user)).Methods(http.MethodGet)
+	router.HandleFunc("/products", h.handleGetProducts).Methods(http.MethodGet)
 	router.HandleFunc("/products", auth.WithJWTAuth(h.handleCreateProduct, h.user)).Methods(http.MethodPost)
 	router.HandleFunc("/product/{id:[0-9]+}", h.handleGetProduct).Methods(http.MethodGet)
+	router.HandleFunc("/product/edit/{id:[0-9]+}", auth.WithJWTAuth(h.handleUpdateProduct, h.user)).Methods(http.MethodPost)
 }
 
 func (h *Handler) handleCreateProduct(w http.ResponseWriter, r *http.Request) {
@@ -78,9 +79,53 @@ func (h *Handler) handleGetProduct(w http.ResponseWriter, r *http.Request) {
 	utils.WriteJSON(w, http.StatusOK, p)
 }
 
-// func handleUpdateProduct(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleUpdateProduct(w http.ResponseWriter, r *http.Request) {
 
-// }
+	q := mux.Vars(r)
+	id, err := strconv.Atoi(q["id"])
+
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	//validate payload
+	var payload types.UpdateProductPayload
+	if err := utils.ParseJSON(r, &payload); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := utils.Validate.Struct(payload); err != nil {
+		errors := err.(validator.ValidationErrors)
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid payload %v", errors))
+		return
+	}
+
+	_, err = h.store.GetDetailProduct(id)
+
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	err = h.store.UpdateProduct(types.Product{
+		ID:          id,
+		Name:        payload.Name,
+		Description: payload.Description,
+		Image:       payload.Image,
+		Price:       payload.Price,
+		Quantity:    payload.Quantity,
+	})
+
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, "Success")
+
+}
 
 func (h *Handler) handleGetProducts(w http.ResponseWriter, r *http.Request) {
 

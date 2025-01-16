@@ -90,3 +90,11 @@ type CartCheckoutPayload struct {
 type ProductDetailPayload struct {
 	ID int `json:"id" validate:"required"`
 }
+
+type UpdateProductPayload struct {
+	Name        string  `json:"name" validate:"required"`
+	Description string  `json:"description" validate:"required"`
+	Image       string  `json:"image" validate:"required"`
+	Price       float64 `json:"price" validate:"required"`
+	Quantity    int     `json:"quantity" validate:"required"`
+}
