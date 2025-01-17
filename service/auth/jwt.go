@@ -58,23 +58,24 @@ func WithJWTAuth(handlerFunc http.HandlerFunc, store types.UserStore) http.Handl
 		claims := token.Claims.(jwt.MapClaims)
 		str := claims["userID"].(string)
 
-		_, err = strconv.Atoi(str)
+		userID, err := strconv.Atoi(str)
 
 		if err != nil {
 			log.Println(err)
 			return
 		}
 
-		// u, err := store.GetUserByID(userID)
+		u, err := store.GetUserByID(userID)
 
-		// if err != nil {
-		// 	log.Printf("failed to get user by id: %v", err)
-		// 	return
-		// }
+		if err != nil {
+			log.Printf("failed to get user by id: %v", err)
+			permissionDenied(w)
+			return
+		}
 
 		// set context "userID"
 		ctx := r.Context()
-		ctx = context.WithValue(ctx, UserKey, 1)
+		ctx = context.WithValue(ctx, UserKey, u.ID)
 
 		r = r.WithContext(ctx)
 

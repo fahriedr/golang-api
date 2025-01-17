@@ -17,14 +17,14 @@ type Handler struct {
 	user  types.UserStore
 }
 
-func NewHandler(store types.ProductStore) *Handler {
-	return &Handler{store: store}
+func NewHandler(store types.ProductStore, user types.UserStore) *Handler {
+	return &Handler{store: store, user: user}
 }
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/products", h.handleGetProducts).Methods(http.MethodGet)
 	router.HandleFunc("/products", auth.WithJWTAuth(h.handleCreateProduct, h.user)).Methods(http.MethodPost)
-	router.HandleFunc("/product/{id:[0-9]+}", h.handleGetProduct).Methods(http.MethodGet)
+	router.HandleFunc("/product/{id:[0-9]+}", auth.WithJWTAuth(h.handleGetProduct, h.user)).Methods(http.MethodGet)
 	router.HandleFunc("/product/edit/{id:[0-9]+}", auth.WithJWTAuth(h.handleUpdateProduct, h.user)).Methods(http.MethodPost)
 }
 
