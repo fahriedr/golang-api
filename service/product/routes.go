@@ -26,6 +26,7 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/products", auth.WithJWTAuth(h.handleCreateProduct, h.user)).Methods(http.MethodPost)
 	router.HandleFunc("/product/{id:[0-9]+}", auth.WithJWTAuth(h.handleGetProduct, h.user)).Methods(http.MethodGet)
 	router.HandleFunc("/product/edit/{id:[0-9]+}", auth.WithJWTAuth(h.handleUpdateProduct, h.user)).Methods(http.MethodPost)
+	router.HandleFunc("/product/{id:[0-9]+}", auth.WithJWTAuth(h.handleDeleteProduct, h.user)).Methods(http.MethodDelete)
 }
 
 func (h *Handler) handleCreateProduct(w http.ResponseWriter, r *http.Request) {
@@ -137,4 +138,31 @@ func (h *Handler) handleGetProducts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteJSON(w, http.StatusOK, p)
+}
+
+func (h *Handler) handleDeleteProduct(w http.ResponseWriter, r *http.Request) {
+	q := mux.Vars(r)
+	id, err := strconv.Atoi(q["id"])
+
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	//Check product
+	_, err = h.store.GetDetailProduct(id)
+
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	err = h.store.DeleteProduct(id)
+
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, map[string]string{"message": "Data successfully deleted"})
 }

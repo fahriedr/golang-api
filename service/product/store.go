@@ -124,3 +124,14 @@ func (s *Store) GetDetailProduct(id int) (*types.Product, error) {
 	return p, nil
 
 }
+
+func (s *Store) DeleteProduct(id int) error {
+
+	_, err := s.db.Exec("DELETE FROM products WHERE id = ?", id)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

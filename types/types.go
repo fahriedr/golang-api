@@ -14,6 +14,7 @@ type ProductStore interface {
 	GetProductsByIDs(ps []int) ([]Product, error)
 	UpdateProduct(Product) error
 	GetDetailProduct(ps int) (*Product, error)
+	DeleteProduct(id int) error
 }
 
 type OrderStore interface {
